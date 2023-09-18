@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(msgpack_perf
+project(binary_perf
     VERSION 0.0.1
     LANGUAGES CXX)
 
