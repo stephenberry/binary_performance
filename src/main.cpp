@@ -115,6 +115,7 @@ struct results
 {
    double write{};
    double read{};
+   uint64_t size{};
 };
 
 results eve_test()
@@ -134,7 +135,6 @@ results eve_test()
 
    auto t1 = std::chrono::steady_clock::now();
 
-   std::cout << "EVE size: " << buffer.size() << '\n';
    const auto write = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
    std::cout << "EVE write performance: " << write << '\n';
@@ -156,7 +156,7 @@ results eve_test()
 
    std::cout << "EVE read performance: " << read << '\n';
 
-   return {write, read};
+   return {write, read, buffer.size()};
 }
 
 results msgpack_test()
@@ -177,8 +177,6 @@ results msgpack_test()
 
    auto t1 = std::chrono::steady_clock::now();
 
-   // std::cout << "Message: " << std::string_view{packed.data(), packed.size()} << '\n';
-   std::cout << "MessagePack size: " << packed.size() << '\n';
    const auto write = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
    std::cout << "MessagePack write performance: " << write << '\n';
@@ -199,7 +197,7 @@ results msgpack_test()
 
    std::cout << "MessagePack read performance: " << read << '\n';
 
-   return {write, read};
+   return {write, read, packed.size()};
 }
 
 #include <random>
@@ -211,7 +209,8 @@ template <class T>
 results eve_vector_test()
 {
    std::mt19937_64 gen{};
-   using dist_t = std::conditional_t<std::is_floating_point_v<T>, std::uniform_real_distribution<T>, std::uniform_int_distribution<T>>;
+   using dist_t = std::conditional_t<std::is_floating_point_v<T>, std::uniform_real_distribution<T>,
+                                     std::uniform_int_distribution<T>>;
    dist_t dist{0, (std::numeric_limits<T>::max)()};
    std::vector<T> x(vector_size);
    for (auto& v : x) {
@@ -231,7 +230,6 @@ results eve_vector_test()
 
    const auto write = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
-   std::cout << "EVE size: " << packed.size() << '\n';
    std::cout << "EVE write performance: " << write << '\n';
 
    // read performance
@@ -245,20 +243,21 @@ results eve_vector_test()
 
    t1 = std::chrono::steady_clock::now();
 
-   std::cout << "Success: " << (x == y ? "true" : "false") << '\n';
+   //std::cout << "Success: " << (x == y ? "true" : "false") << '\n';
 
    const auto read = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
    std::cout << "EVE read performance: " << read << '\n';
 
-   return {write, read};
+   return {write, read, packed.size()};
 }
 
 template <class T>
 results msgpack_vector_test()
 {
    std::mt19937_64 gen{};
-   using dist_t = std::conditional_t<std::is_floating_point_v<T>, std::uniform_real_distribution<T>, std::uniform_int_distribution<T>>;
+   using dist_t = std::conditional_t<std::is_floating_point_v<T>, std::uniform_real_distribution<T>,
+                                     std::uniform_int_distribution<T>>;
    dist_t dist{0, (std::numeric_limits<T>::max)()};
    std::vector<T> x(vector_size);
    for (auto& v : x) {
@@ -279,7 +278,6 @@ results msgpack_vector_test()
 
    const auto write = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
-   std::cout << "MessagePack size: " << packed.size() << '\n';
    std::cout << "MessagePack write performance: " << write << '\n';
 
    // read performance
@@ -294,30 +292,38 @@ results msgpack_vector_test()
 
    t1 = std::chrono::steady_clock::now();
 
-   std::cout << "Success: " << (x == y ? "true" : "false") << '\n';
+   //std::cout << "Success: " << (x == y ? "true" : "false") << '\n';
 
    const auto read = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
    std::cout << "MessagePack read performance: " << read << '\n';
 
-   return {write, read};
+   return {write, read, packed.size()};
+}
+
+template <class T>
+void array_performance()
+{
+   std::cout << "****\n";
+   auto [eve_read, eve_write, eve_size] = eve_vector_test<int16_t>();
+   auto [msgpack_read, msgpack_write, msgpack_size] = msgpack_vector_test<int16_t>();
+   std::cout << "Read: " << (msgpack_read - eve_read) / eve_read * 100 << "% faster\n";
+   std::cout << "Write: " << (msgpack_write - eve_write) / eve_write * 100 << "% faster\n";
+   std::cout << "Message Size: " << (double(msgpack_size) - eve_size) / eve_size * 100 << "%\n";
 }
 
 int main()
 {
    std::cout << "----\n";
-   {
-      auto [eve_read, eve_write] = eve_test();
-      auto [msgpack_read, msg_pack_write] = msgpack_test();
-      std::cout << "Read: " << (msgpack_read - eve_read) / eve_read * 100 << "% faster\n";
-      std::cout << "Write: " << (msg_pack_write - eve_write) / eve_write * 100 << "% faster\n";
-   }
-   {
-      auto [eve_read, eve_write] = eve_vector_test<int16_t>();
-      auto [msgpack_read, msg_pack_write] = msgpack_vector_test<int16_t>();
-      std::cout << "Read: " << (msgpack_read - eve_read) / eve_read * 100 << "% faster\n";
-      std::cout << "Write: " << (msg_pack_write - eve_write) / eve_write * 100 << "% faster\n";
-   }
+   auto [eve_read, eve_write, eve_size] = eve_test();
+   auto [msgpack_read, msgpack_write, msgpack_size] = msgpack_test();
+   std::cout << "Read: " << (msgpack_read - eve_read) / eve_read * 100 << "% faster\n";
+   std::cout << "Write: " << (msgpack_write - eve_write) / eve_write * 100 << "% faster\n";
+   std::cout << "Message Size: " << (double(msgpack_size) - eve_size) / eve_size * 100 << "%\n";
+
+   array_performance<double>();
+   array_performance<float>();
+   array_performance<uint16_t>();
 
    return 0;
 }
