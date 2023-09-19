@@ -305,8 +305,8 @@ template <class T>
 void array_performance()
 {
    std::cout << "****\n";
-   auto [eve_read, eve_write, eve_size] = eve_vector_test<int16_t>();
-   auto [msgpack_read, msgpack_write, msgpack_size] = msgpack_vector_test<int16_t>();
+   auto [eve_read, eve_write, eve_size] = eve_vector_test<T>();
+   auto [msgpack_read, msgpack_write, msgpack_size] = msgpack_vector_test<T>();
    std::cout << "Read: " << (msgpack_read - eve_read) / eve_read * 100 << "% faster\n";
    std::cout << "Write: " << (msgpack_write - eve_write) / eve_write * 100 << "% faster\n";
    std::cout << "Message Size: " << (double(msgpack_size) - eve_size) / eve_size * 100 << "%\n";
