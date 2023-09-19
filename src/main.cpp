@@ -309,14 +309,14 @@ int main()
    {
       auto [eve_read, eve_write] = eve_test();
       auto [msgpack_read, msg_pack_write] = msgpack_test();
-      std::cout << "Read ratio: " << msgpack_read / eve_read << "X\n";
-      std::cout << "Write ratio: " << msg_pack_write / eve_write << "X\n";
+      std::cout << "Read: " << (msgpack_read - eve_read) / eve_read * 100 << "% faster\n";
+      std::cout << "Write: " << (msg_pack_write - eve_write) / eve_write * 100 << "% faster\n";
    }
    {
-      auto [eve_read, eve_write] = eve_vector_test<uint16_t>();
-      auto [msgpack_read, msg_pack_write] = msgpack_vector_test<uint16_t>();
-      std::cout << "Read ratio: " << msgpack_read / eve_read << "X\n";
-      std::cout << "Write ratio: " << msg_pack_write / eve_write << "X\n";
+      auto [eve_read, eve_write] = eve_vector_test<int16_t>();
+      auto [msgpack_read, msg_pack_write] = msgpack_vector_test<int16_t>();
+      std::cout << "Read: " << (msgpack_read - eve_read) / eve_read * 100 << "% faster\n";
+      std::cout << "Write: " << (msg_pack_write - eve_write) / eve_write * 100 << "% faster\n";
    }
 
    return 0;
