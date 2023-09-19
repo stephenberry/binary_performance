@@ -1,6 +1,7 @@
 
 #include <glaze/exceptions/binary_exceptions.hpp>
 #include <limits>
+#include <type_traits>
 
 #include "glaze/binary/write.hpp"
 #include "glaze/core/macros.hpp"
@@ -203,14 +204,16 @@ results msgpack_test()
 
 #include <random>
 
-constexpr auto vector_iterations = 100'000;
+constexpr auto vector_size = 10'000;
+constexpr auto vector_iterations = iterations / 10;
 
-results eve_vector_double_test()
+template <class T>
+results eve_vector_test()
 {
-   constexpr auto N = 10'000;
    std::mt19937_64 gen{};
-   std::uniform_real_distribution<double> dist{0.0, (std::numeric_limits<double>::max)()};
-   std::vector<double> x(N);
+   using dist_t = std::conditional_t<std::is_floating_point_v<T>, std::uniform_real_distribution<T>, std::uniform_int_distribution<T>>;
+   dist_t dist{0, (std::numeric_limits<T>::max)()};
+   std::vector<T> x(vector_size);
    for (auto& v : x) {
       v = dist(gen);
    }
@@ -235,11 +238,14 @@ results eve_vector_double_test()
 
    t0 = std::chrono::steady_clock::now();
 
+   std::vector<T> y;
    for (size_t i = 0; i < vector_iterations; ++i) {
-      glz::ex::read_binary(x, packed);
+      glz::ex::read_binary(y, packed);
    }
 
    t1 = std::chrono::steady_clock::now();
+
+   std::cout << "Success: " << (x == y ? "true" : "false") << '\n';
 
    const auto read = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
@@ -248,12 +254,13 @@ results eve_vector_double_test()
    return {write, read};
 }
 
-results msgpack_vector_double_test()
+template <class T>
+results msgpack_vector_test()
 {
-   constexpr auto N = 10'000;
    std::mt19937_64 gen{};
-   std::uniform_real_distribution<double> dist{0.0, (std::numeric_limits<double>::max)()};
-   std::vector<double> x(N);
+   using dist_t = std::conditional_t<std::is_floating_point_v<T>, std::uniform_real_distribution<T>, std::uniform_int_distribution<T>>;
+   dist_t dist{0, (std::numeric_limits<T>::max)()};
+   std::vector<T> x(vector_size);
    for (auto& v : x) {
       v = dist(gen);
    }
@@ -279,12 +286,15 @@ results msgpack_vector_double_test()
 
    t0 = std::chrono::steady_clock::now();
 
+   std::vector<T> y;
    for (size_t i = 0; i < vector_iterations; ++i) {
       msgpack::object_handle oh = msgpack::unpack(packed.data(), packed.size());
-      oh.get().convert(x);
+      oh.get().convert(y);
    }
 
    t1 = std::chrono::steady_clock::now();
+
+   std::cout << "Success: " << (x == y ? "true" : "false") << '\n';
 
    const auto read = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
@@ -295,6 +305,7 @@ results msgpack_vector_double_test()
 
 int main()
 {
+   std::cout << "----\n";
    {
       auto [eve_read, eve_write] = eve_test();
       auto [msgpack_read, msg_pack_write] = msgpack_test();
@@ -302,8 +313,8 @@ int main()
       std::cout << "Write ratio: " << msg_pack_write / eve_write << "X\n";
    }
    {
-      auto [eve_read, eve_write] = eve_vector_double_test();
-      auto [msgpack_read, msg_pack_write] = msgpack_vector_double_test();
+      auto [eve_read, eve_write] = eve_vector_test<uint16_t>();
+      auto [msgpack_read, msg_pack_write] = msgpack_vector_test<uint16_t>();
       std::cout << "Read ratio: " << msgpack_read / eve_read << "X\n";
       std::cout << "Write ratio: " << msg_pack_write / eve_write << "X\n";
    }
