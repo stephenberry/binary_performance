@@ -137,7 +137,7 @@ results eve_test()
 
    const auto write = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
-   std::cout << "EVE write performance: " << write << '\n';
+   std::cout << "EVE write time: " << write << '\n';
 
    // read performance
 
@@ -154,7 +154,7 @@ results eve_test()
 
    const auto read = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
-   std::cout << "EVE read performance: " << read << '\n';
+   std::cout << "EVE read time: " << read << '\n';
 
    return {write, read, buffer.size()};
 }
@@ -179,7 +179,7 @@ results msgpack_test()
 
    const auto write = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
-   std::cout << "MessagePack write performance: " << write << '\n';
+   std::cout << "MessagePack write time: " << write << '\n';
 
    // read performance
 
@@ -195,7 +195,7 @@ results msgpack_test()
 
    const auto read = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
-   std::cout << "MessagePack read performance: " << read << '\n';
+   std::cout << "MessagePack read time: " << read << '\n';
 
    return {write, read, packed.size()};
 }
@@ -230,7 +230,7 @@ results eve_vector_test()
 
    const auto write = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
-   std::cout << "EVE write performance: " << write << '\n';
+   std::cout << "EVE write time: " << write << '\n';
 
    // read performance
 
@@ -247,7 +247,7 @@ results eve_vector_test()
 
    const auto read = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
-   std::cout << "EVE read performance: " << read << '\n';
+   std::cout << "EVE read time: " << read << '\n';
 
    return {write, read, packed.size()};
 }
@@ -278,7 +278,7 @@ results msgpack_vector_test()
 
    const auto write = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
-   std::cout << "MessagePack write performance: " << write << '\n';
+   std::cout << "MessagePack write time: " << write << '\n';
 
    // read performance
 
@@ -296,7 +296,7 @@ results msgpack_vector_test()
 
    const auto read = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
 
-   std::cout << "MessagePack read performance: " << read << '\n';
+   std::cout << "MessagePack read time: " << read << '\n';
 
    return {write, read, packed.size()};
 }
