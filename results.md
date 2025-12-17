@@ -20,23 +20,23 @@ Higher means BEVE is faster by that factor. Format: Write/Read
 
 | Test | JSON | MsgPack | CBOR | Protobuf |
 |------|------|---------|------|----------|
-| Complex Nested Object | 2.3x/2.2x | 2.0x/10.0x | 7.7x/32.1x | 1.3x/2.5x |
-| std::vector<double> (10K) | 152.3x/144.5x | 17.5x/37.9x | 156.5x/137.7x | 1.9x/1.5x |
-| std::vector<float> (10K) | 229.2x/235.9x | 34.7x/76.6x | 159.5x/301.5x | 1.9x/1.5x |
-| std::vector<uint64_t> (10K) | 43.6x/80.6x | 17.1x/35.0x | 155.9x/126.0x | 1.8x/1.5x |
-| std::vector<uint32_t> (10K) | 53.8x/87.4x | 34.1x/72.7x | 160.5x/287.3x | 1.9x/1.5x |
-| std::vector<uint16_t> (10K) | 94.5x/157.8x | 68.9x/194.5x | 202.8x/684.2x | 1.9x/2.0x |
+| Complex Nested Object | 2.3x/2.2x | 2.0x/9.8x | 7.6x/31.8x | 1.3x/2.5x |
+| std::vector<double> (10K) | 151.0x/143.3x | 17.7x/38.3x | 126.4x/56.8x | 1.9x/1.5x |
+| std::vector<float> (10K) | 234.8x/229.4x | 35.4x/73.9x | 130.1x/106.1x | 1.9x/1.5x |
+| std::vector<uint64_t> (10K) | 45.2x/84.1x | 17.4x/36.6x | 126.9x/60.7x | 1.8x/1.5x |
+| std::vector<uint32_t> (10K) | 55.7x/91.5x | 34.0x/72.5x | 127.7x/108.4x | 1.9x/1.5x |
+| std::vector<uint16_t> (10K) | 93.4x/147.2x | 68.0x/181.2x | 126.1x/270.2x | 1.9x/1.9x |
 
 ## Message Sizes
 
 | Test | JSON | BEVE | MessagePack | CBOR | Protobuf |
 |------|------|------|-------------|------|----------|
 | Complex Nested Object | 616 B | 564 B | 545 B | 545 B | 344 B |
-| std::vector<double> (10K) | 219.02 KB | 78.13 KB | 87.89 KB | 87.89 KB | 78.13 KB |
-| std::vector<float> (10K) | 124.11 KB | 39.07 KB | 48.83 KB | 48.83 KB | 39.07 KB |
-| std::vector<uint64_t> (10K) | 199.23 KB | 78.13 KB | 87.89 KB | 87.89 KB | 78.13 KB |
-| std::vector<uint32_t> (10K) | 104.97 KB | 39.07 KB | 48.83 KB | 48.83 KB | 39.07 KB |
-| std::vector<uint16_t> (10K) | 56.96 KB | 19.53 KB | 29.26 KB | 29.26 KB | 19.54 KB |
+| std::vector<double> (10K) | 219.02 KB | 78.13 KB | 87.89 KB | 78.13 KB | 78.13 KB |
+| std::vector<float> (10K) | 124.11 KB | 39.07 KB | 48.83 KB | 39.07 KB | 39.07 KB |
+| std::vector<uint64_t> (10K) | 199.23 KB | 78.13 KB | 87.89 KB | 78.13 KB | 78.13 KB |
+| std::vector<uint32_t> (10K) | 104.97 KB | 39.07 KB | 48.83 KB | 39.07 KB | 39.07 KB |
+| std::vector<uint16_t> (10K) | 56.96 KB | 19.53 KB | 29.26 KB | 19.54 KB | 19.54 KB |
 
 ## Detailed Results
 
@@ -47,8 +47,8 @@ Higher means BEVE is faster by that factor. Format: Write/Read
 | Metric | JSON | BEVE | MessagePack | CBOR | Protobuf |
 |--------|------|------|-------------|------|----------|
 | Message Size | 616 B | 564 B | 545 B | 545 B | 344 B |
-| Write Throughput | 1.42 GB/s | 2.97 GB/s | 1.47 GB/s | 370.39 MB/s | 1.38 GB/s |
-| Read Throughput | 1.30 GB/s | 2.66 GB/s | 258.61 MB/s | 80.20 MB/s | 645.53 MB/s |
+| Write Throughput | 1.39 GB/s | 2.92 GB/s | 1.42 GB/s | 371.55 MB/s | 1.39 GB/s |
+| Read Throughput | 1.33 GB/s | 2.64 GB/s | 261.12 MB/s | 80.16 MB/s | 643.94 MB/s |
 
 ### std::vector<double> (10K)
 
@@ -56,9 +56,9 @@ Higher means BEVE is faster by that factor. Format: Write/Read
 
 | Metric | JSON | BEVE | MessagePack | CBOR | Protobuf |
 |--------|------|------|-------------|------|----------|
-| Message Size | 219.02 KB | 78.13 KB | 87.89 KB | 87.89 KB | 78.13 KB |
-| Write Throughput | 1.14 GB/s | 61.87 GB/s | 3.97 GB/s | 444.77 MB/s | 33.31 GB/s |
-| Read Throughput | 1.20 GB/s | 61.65 GB/s | 1.83 GB/s | 503.74 MB/s | 40.25 GB/s |
+| Message Size | 219.02 KB | 78.13 KB | 87.89 KB | 78.13 KB | 78.13 KB |
+| Write Throughput | 1.14 GB/s | 61.39 GB/s | 3.90 GB/s | 485.60 MB/s | 32.87 GB/s |
+| Read Throughput | 1.19 GB/s | 60.67 GB/s | 1.78 GB/s | 1.07 GB/s | 39.63 GB/s |
 
 ### std::vector<float> (10K)
 
@@ -66,9 +66,9 @@ Higher means BEVE is faster by that factor. Format: Write/Read
 
 | Metric | JSON | BEVE | MessagePack | CBOR | Protobuf |
 |--------|------|------|-------------|------|----------|
-| Message Size | 124.11 KB | 39.07 KB | 48.83 KB | 48.83 KB | 39.07 KB |
-| Write Throughput | 865.66 MB/s | 62.47 GB/s | 2.25 GB/s | 489.46 MB/s | 32.20 GB/s |
-| Read Throughput | 828.23 MB/s | 61.50 GB/s | 1.00 GB/s | 255.02 MB/s | 40.97 GB/s |
+| Message Size | 124.11 KB | 39.07 KB | 48.83 KB | 39.07 KB | 39.07 KB |
+| Write Throughput | 853.90 MB/s | 63.11 GB/s | 2.23 GB/s | 485.19 MB/s | 33.72 GB/s |
+| Read Throughput | 829.46 MB/s | 59.90 GB/s | 1.01 GB/s | 564.42 MB/s | 39.41 GB/s |
 
 ### std::vector<uint64_t> (10K)
 
@@ -76,9 +76,9 @@ Higher means BEVE is faster by that factor. Format: Write/Read
 
 | Metric | JSON | BEVE | MessagePack | CBOR | Protobuf |
 |--------|------|------|-------------|------|----------|
-| Message Size | 199.23 KB | 78.13 KB | 87.89 KB | 87.89 KB | 78.13 KB |
-| Write Throughput | 3.51 GB/s | 60.08 GB/s | 3.96 GB/s | 433.63 MB/s | 33.20 GB/s |
-| Read Throughput | 1.86 GB/s | 58.88 GB/s | 1.89 GB/s | 525.51 MB/s | 40.21 GB/s |
+| Message Size | 199.23 KB | 78.13 KB | 87.89 KB | 78.13 KB | 78.13 KB |
+| Write Throughput | 3.43 GB/s | 60.94 GB/s | 3.93 GB/s | 480.17 MB/s | 34.72 GB/s |
+| Read Throughput | 1.87 GB/s | 61.58 GB/s | 1.89 GB/s | 1.02 GB/s | 40.42 GB/s |
 
 ### std::vector<uint32_t> (10K)
 
@@ -86,9 +86,9 @@ Higher means BEVE is faster by that factor. Format: Write/Read
 
 | Metric | JSON | BEVE | MessagePack | CBOR | Protobuf |
 |--------|------|------|-------------|------|----------|
-| Message Size | 104.97 KB | 39.07 KB | 48.83 KB | 48.83 KB | 39.07 KB |
-| Write Throughput | 3.11 GB/s | 62.22 GB/s | 2.28 GB/s | 484.44 MB/s | 32.37 GB/s |
-| Read Throughput | 1.87 GB/s | 60.89 GB/s | 1.05 GB/s | 264.86 MB/s | 40.59 GB/s |
+| Message Size | 104.97 KB | 39.07 KB | 48.83 KB | 39.07 KB | 39.07 KB |
+| Write Throughput | 2.96 GB/s | 61.31 GB/s | 2.25 GB/s | 480.01 MB/s | 32.79 GB/s |
+| Read Throughput | 1.79 GB/s | 60.85 GB/s | 1.05 GB/s | 561.46 MB/s | 40.15 GB/s |
 
 ### std::vector<uint16_t> (10K)
 
@@ -96,9 +96,9 @@ Higher means BEVE is faster by that factor. Format: Write/Read
 
 | Metric | JSON | BEVE | MessagePack | CBOR | Protobuf |
 |--------|------|------|-------------|------|----------|
-| Message Size | 56.96 KB | 19.53 KB | 29.26 KB | 29.26 KB | 19.54 KB |
-| Write Throughput | 1.95 GB/s | 63.19 GB/s | 1.37 GB/s | 466.73 MB/s | 33.67 GB/s |
-| Read Throughput | 1.51 GB/s | 81.57 GB/s | 627.99 MB/s | 178.61 MB/s | 41.05 GB/s |
+| Message Size | 56.96 KB | 19.53 KB | 29.26 KB | 19.54 KB | 19.54 KB |
+| Write Throughput | 1.92 GB/s | 61.63 GB/s | 1.36 GB/s | 488.74 MB/s | 33.09 GB/s |
+| Read Throughput | 1.48 GB/s | 74.92 GB/s | 619.27 MB/s | 277.33 MB/s | 39.63 GB/s |
 
 ## Analysis
 

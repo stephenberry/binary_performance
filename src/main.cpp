@@ -339,6 +339,7 @@ results msgpack_test()
 }
 
 // CBOR tests (jsoncons)
+// Note: typed arrays (RFC 8746) are enabled for vector tests below
 results cbor_test()
 {
    obj_t obj{};
@@ -508,11 +509,13 @@ results cbor_vector_test()
       v = dist(gen);
    }
 
+   auto options = jsoncons::cbor::cbor_options{}.use_typed_arrays(true);
+
    auto t0 = std::chrono::steady_clock::now();
    std::vector<uint8_t> packed;
    for (size_t i = 0; i < vector_iterations; ++i) {
       packed.clear();
-      jsoncons::cbor::encode_cbor(x, packed);
+      jsoncons::cbor::encode_cbor(x, packed, options);
    }
    auto t1 = std::chrono::steady_clock::now();
    const auto write = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
