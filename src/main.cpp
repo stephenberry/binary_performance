@@ -10,14 +10,12 @@
 
 #include "glaze/glaze.hpp"
 #include "glaze/beve.hpp"
+#include "glaze/cbor.hpp"
 #include "glaze/glaze_exceptions.hpp"
 #include "glaze/exceptions/binary_exceptions.hpp"
 
 #define MSGPACK_NO_BOOST
 #include "msgpack.hpp"
-
-#include <jsoncons/json.hpp>
-#include <jsoncons_ext/cbor/cbor.hpp>
 
 #include "zpp_bits.h"
 
@@ -107,13 +105,6 @@ struct obj_t
    MSGPACK_DEFINE_MAP(fixed_object, fixed_name_object, another_object, string_array, string, number, boolean,
                       another_bool);
 };
-
-// jsoncons traits for CBOR serialization
-JSONCONS_ALL_MEMBER_TRAITS(fixed_object_t, int_array, float_array, double_array)
-JSONCONS_ALL_MEMBER_TRAITS(fixed_name_object_t, name0, name1, name2, name3, name4)
-JSONCONS_ALL_MEMBER_TRAITS(nested_object_t, v3s, id)
-JSONCONS_ALL_MEMBER_TRAITS(another_object_t, string, another_string, boolean, nested_object)
-JSONCONS_ALL_MEMBER_TRAITS(obj_t, fixed_object, fixed_name_object, another_object, string_array, string, number, boolean, another_bool)
 
 // Protobuf-compatible structs for zpp_bits
 namespace pb {
@@ -338,8 +329,7 @@ results msgpack_test()
    return {write, read, packed.size()};
 }
 
-// CBOR tests (jsoncons)
-// Note: typed arrays (RFC 8746) are enabled for vector tests below
+// CBOR tests (Glaze)
 results cbor_test()
 {
    obj_t obj{};
@@ -347,10 +337,9 @@ results cbor_test()
    glz::ex::read_json(obj, buffer);
 
    auto t0 = std::chrono::steady_clock::now();
-   std::vector<uint8_t> packed;
+   std::string packed;
    for (size_t i = 0; i < iterations; ++i) {
-      packed.clear();
-      jsoncons::cbor::encode_cbor(obj, packed);
+      [[maybe_unused]] auto ec = glz::write_cbor(obj, packed);
    }
    auto t1 = std::chrono::steady_clock::now();
    const auto write = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
@@ -358,7 +347,10 @@ results cbor_test()
    obj = obj_t{};
    t0 = std::chrono::steady_clock::now();
    for (size_t i = 0; i < iterations; ++i) {
-      obj = jsoncons::cbor::decode_cbor<obj_t>(packed);
+      if (glz::read_cbor(obj, packed)) {
+         std::cerr << "glaze cbor error!\n";
+         break;
+      }
    }
    t1 = std::chrono::steady_clock::now();
    const auto read = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
@@ -509,13 +501,10 @@ results cbor_vector_test()
       v = dist(gen);
    }
 
-   auto options = jsoncons::cbor::cbor_options{}.use_typed_arrays(true);
-
    auto t0 = std::chrono::steady_clock::now();
-   std::vector<uint8_t> packed;
+   std::string packed;
    for (size_t i = 0; i < vector_iterations; ++i) {
-      packed.clear();
-      jsoncons::cbor::encode_cbor(x, packed, options);
+      [[maybe_unused]] auto ec = glz::write_cbor(x, packed);
    }
    auto t1 = std::chrono::steady_clock::now();
    const auto write = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
@@ -523,7 +512,10 @@ results cbor_vector_test()
    t0 = std::chrono::steady_clock::now();
    std::vector<T> y;
    for (size_t i = 0; i < vector_iterations; ++i) {
-      y = jsoncons::cbor::decode_cbor<std::vector<T>>(packed);
+      if (glz::read_cbor(y, packed)) {
+         std::cerr << "glaze cbor vector error!\n";
+         break;
+      }
    }
    t1 = std::chrono::steady_clock::now();
    const auto read = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() * 1e-6;
@@ -651,10 +643,9 @@ void generate_markdown(const std::vector<benchmark_result>& results, const std::
 
    out << "# Serialization Performance: JSON vs BEVE vs MessagePack vs CBOR vs Protobuf\n\n";
 
-   out << "Benchmark comparing [JSON](https://www.json.org/) and [BEVE](https://github.com/beve-org/beve) ";
-   out << "(via [Glaze](https://github.com/stephenberry/glaze)), ";
-   out << "[MessagePack](https://github.com/msgpack/msgpack-c), ";
-   out << "[CBOR](https://cbor.io/) (via [jsoncons](https://github.com/danielaparker/jsoncons)), and ";
+   out << "Benchmark comparing [JSON](https://www.json.org/), [BEVE](https://github.com/beve-org/beve), and ";
+   out << "[CBOR](https://cbor.io/) (via [Glaze](https://github.com/stephenberry/glaze)), ";
+   out << "[MessagePack](https://github.com/msgpack/msgpack-c), and ";
    out << "[Protocol Buffers](https://protobuf.dev/) (via [zpp_bits](https://github.com/eyalz800/zpp_bits)).\n\n";
 
    out << "## Test Environment\n\n";
@@ -663,7 +654,6 @@ void generate_markdown(const std::vector<benchmark_result>& results, const std::
    out << "| Date | " << date_stream.str() << " |\n";
    out << "| Glaze | " << int(glz::version.major) << "." << int(glz::version.minor) << "." << int(glz::version.patch) << " |\n";
    out << "| msgpack-c | 7.0.0 |\n";
-   out << "| jsoncons | 1.5.0 |\n";
    out << "| zpp_bits (protobuf) | latest |\n";
    out << "| C++ Standard | C++20 |\n";
    out << "| Build | Release (-O3) |\n\n";
@@ -722,9 +712,9 @@ void generate_markdown(const std::vector<benchmark_result>& results, const std::
 
    out << "\n## Analysis\n\n";
 
-   out << "### Why BEVE Excels at Numeric Arrays\n\n";
-   out << "BEVE stores contiguous arrays of trivially copyable types as raw memory blocks, ";
-   out << "enabling efficient `memcpy` operations. MessagePack and CBOR encode each element individually ";
+   out << "### Why BEVE and CBOR (Glaze) Excel at Numeric Arrays\n\n";
+   out << "Both BEVE and CBOR (via Glaze) store contiguous arrays of trivially copyable types as raw memory blocks, ";
+   out << "enabling efficient `memcpy` operations. MessagePack encodes each element individually ";
    out << "with type tags, resulting in significant overhead for numeric data. ";
    out << "Protobuf (via zpp_bits) also uses memcpy for packed repeated fields, but has additional overhead from ";
    out << "varint length prefixes, field tags, and in this benchmark, struct conversion between native C++ types and protobuf-compatible types.\n";
